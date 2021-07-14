@@ -10,9 +10,8 @@ def mk_bias(o):
     if isinstance(o, str):
         if '{' in o:
             return Bias.parse_raw(o)
-        else:
-            w, adj = o.split(',')
-            return Bias(pattern=w, adjust=adj)
+        w, adj = o.split(',')
+        return Bias(pattern=w, adjust=adj)
     elif isinstance(o, dict):
         return Bias.parse_obj(o)
     elif isinstance(o, Bias):

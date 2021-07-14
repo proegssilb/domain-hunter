@@ -20,7 +20,7 @@ def generate_word_chain(config: RunConfig) -> Iterable[WordCombo]:
 
 
 def process_word(biases, word: str) -> ScoredWord:
-    score = 3 + sum([b.adjust for b in biases if b.pattern in word])
+    score = 3 + sum(b.adjust for b in biases if b.pattern in word)
     return ScoredWord(word=word, score=score)
 
 
