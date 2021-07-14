@@ -4,7 +4,7 @@ import re
 from collections.abc import Iterable
 from typing import Callable, Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, constr, confloat
 
 
 class ListSource:
@@ -31,8 +31,8 @@ Filter = re.compile
 
 
 class Bias(BaseModel):
-    pattern: str
-    adjust: int
+    pattern: constr(min_length=1)
+    adjust: confloat(ge=-2, le=2)
 
     class Config:
         allow_mutation = False
@@ -43,4 +43,4 @@ class Bias(BaseModel):
 
 class ScoreWeight(BaseModel):
     query: str
-    adjust: int
+    adjust: float
