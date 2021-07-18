@@ -1,15 +1,16 @@
 import re
 from itertools import islice
 
-from hypothesis import given, strategies as st, assume
+import env.env_config
+from hypothesis import assume, given
+from hypothesis import strategies as st
 from hypothesis.strategies import composite
 
-import env.env_config
 import hunterlib.steps
 import hunterlib.steps.chains
 import hunterlib.steps.config
 import hunterlib.steps.domains
-from hunterlib.conf import RunConfig, NameGuppyConfig, NamecheapConfig
+from hunterlib.conf import NamecheapConfig, NameGuppyConfig, RunConfig
 from hunterlib.models import Bias, FileSource
 from hunterlib.steps.config import get_flattened_lists_and_files, mk_bias
 from hunterlib.steps.data import ScoredWord, WordCombo

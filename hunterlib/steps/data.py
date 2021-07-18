@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict
 
-from pydantic import BaseModel, constr, confloat
+from pydantic import BaseModel, confloat, constr
 
 
 class ScoredWord(BaseModel):

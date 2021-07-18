@@ -1,8 +1,8 @@
 import logging
 import re
 from dataclasses import dataclass
-from heapq import heappush, heappop
-from typing import Iterable, TypeVar, Callable
+from heapq import heappop, heappush
+from typing import Callable, Iterable, TypeVar
 
 from hunterlib.conf import RunConfig
 from hunterlib.models import Bias
