@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 """Utilities for generating and interacting with word lists."""
 
-logger = logging.getLogger('domain-hunter.wordlist')
+logger = logging.getLogger("domain-hunter.wordlist")
 
 
 def synset_to_str(s: Synset) -> str:
@@ -19,23 +19,26 @@ def words(syn: str) -> Iterable[str]:
     base: Synset = wn.synset(syn)
     tree = base.tree(lambda s: s.hyponyms())
     rv = set()
-    log_msg = 'Generated word from synset.'
+    log_msg = "Generated word from synset."
     for synset in flatten(tree):
         word = synset_to_str(synset)
-        logger.debug(log_msg, extra={
-            'word': word,
-            'alternates': synset.lemma_names(),
-            'tree_base': str(base),
-        })
+        logger.debug(
+            log_msg,
+            extra={
+                "word": word,
+                "alternates": synset.lemma_names(),
+                "tree_base": str(base),
+            },
+        )
         rv.add(word)
     return {synset_to_str(s) for s in flatten(tree)}
 
 
 class PartOfSpeech:
-    ADJECTIVE = {synset_to_str(s) for s in wn.all_synsets('a')}
-    NOUN = {synset_to_str(s) for s in wn.all_synsets('n')}
-    ADVERB = {synset_to_str(s) for s in wn.all_synsets('r')}
-    VERB = {synset_to_str(s) for s in wn.all_synsets('v')}
+    ADJECTIVE = {synset_to_str(s) for s in wn.all_synsets("a")}
+    NOUN = {synset_to_str(s) for s in wn.all_synsets("n")}
+    ADVERB = {synset_to_str(s) for s in wn.all_synsets("r")}
+    VERB = {synset_to_str(s) for s in wn.all_synsets("v")}
 
 
 def flatten(items: Iterable, f=lambda i: True) -> Iterable:
@@ -48,7 +51,9 @@ def flatten(items: Iterable, f=lambda i: True) -> Iterable:
     ['a', 'bd', 'c', 1, 2, 3, 4]
     """
     for el in items:
-        if isinstance(el, Iterable) and not isinstance(el, (str, bytes, BaseModel, dict)):
+        if isinstance(el, Iterable) and not isinstance(
+            el, (str, bytes, BaseModel, dict)
+        ):
             yield from flatten(el)
         elif f(el):
             yield el

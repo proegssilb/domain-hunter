@@ -8,7 +8,7 @@ from hunterlib.conf import RunConfig
 from hunterlib.models import Bias
 from hunterlib.steps.data import ScoredWord, WordCombo
 
-logger = logging.getLogger('domain-hunter.chains')
+logger = logging.getLogger("domain-hunter.chains")
 
 
 def generate_word_chain(config: RunConfig) -> Iterable[WordCombo]:
@@ -26,19 +26,24 @@ def process_word(biases, word: str) -> ScoredWord:
     matching_biases = [b for b in biases if b.pattern in word]
     score = 3 + sum(b.adjust for b in matching_biases)
     score = score - len(word) / 100
-    log_msg = 'Generated score for word.'
-    logger.debug(log_msg, extra={
-        'word': word,
-        'score': score,
-        'biases': matching_biases,
-    })
+    log_msg = "Generated score for word."
+    logger.debug(
+        log_msg,
+        extra={
+            "word": word,
+            "score": score,
+            "biases": matching_biases,
+        },
+    )
     return ScoredWord(word=word, score=score)
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
-def generate_chain(source_list: set[str], biases: set[Bias], max_repeat: int) -> Iterable[WordCombo]:
+def generate_chain(
+    source_list: set[str], biases: set[Bias], max_repeat: int
+) -> Iterable[WordCombo]:
     biased: list[ScoredWord] = [process_word(biases, w) for w in source_list]
     biased.sort(key=lambda t: t.score, reverse=True)
     biased: tuple[ScoredWord] = tuple(biased)
@@ -76,12 +81,15 @@ def search_combos(source: tuple[ScoredWord], max_repeat: int) -> Iterable[WordCo
         while len(heap) > 0:
             next_node = heappop(heap)
             words = get_words(next_node.data)
-            log_msg = 'Yielding words from search_combos'
-            logger.debug(log_msg, extra={'words': str(
-                words), 'priority': next_node.score})
-            yield WordCombo(''.join(w.word for w in words), words)
+            log_msg = "Yielding words from search_combos"
+            logger.debug(
+                log_msg, extra={"words": str(words), "priority": next_node.score}
+            )
+            yield WordCombo("".join(w.word for w in words), words)
             last_index = next_node.data[-1]
-            if len(next_node.data) < max_repeat and next_node.data[-1] + 1 < len(source):
+            if len(next_node.data) < max_repeat and next_node.data[-1] + 1 < len(
+                source
+            ):
                 future_add = next_node.data + (last_index + 1,)
                 score = WordCombo.score_words(get_words(future_add))
                 heappush(heap, QueueNode(future_add, score))
@@ -91,19 +99,23 @@ def search_combos(source: tuple[ScoredWord], max_repeat: int) -> Iterable[WordCo
                 heappush(heap, QueueNode(future_iterate, score))
 
 
-def filter_chain(filter_pattern: set[re.Pattern], chain: Iterable[T], conversion: Callable[[T], str]) -> Iterable[T]:
+def filter_chain(
+    filter_pattern: set[re.Pattern], chain: Iterable[T], conversion: Callable[[T], str]
+) -> Iterable[T]:
     # This is a filter and a map with extra steps. The imperative version is easier to debug.
     for item in chain:
         data = conversion(item)
         if all(p.match(data) for p in filter_pattern):
-            logger.debug('Word matched all filters', extra={
-                'word': data,
-                'filters': filter_pattern
-            })
+            logger.debug(
+                "Word matched all filters",
+                extra={"word": data, "filters": filter_pattern},
+            )
             yield item
         else:
-            logger.debug('Word discarded via filters', extra={
-                         'word': str(data), 'filters': filter_pattern})
+            logger.debug(
+                "Word discarded via filters",
+                extra={"word": str(data), "filters": filter_pattern},
+            )
 
 
 def generate_tld_chain(config: RunConfig):

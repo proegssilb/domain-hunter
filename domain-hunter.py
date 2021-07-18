@@ -16,5 +16,5 @@ def main():
         print("{0:32s} {1: 11.9g}".format(d.domain, d.score))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
