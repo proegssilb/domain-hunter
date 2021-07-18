@@ -77,7 +77,8 @@ def search_combos(source: tuple[ScoredWord], max_repeat: int) -> Iterable[WordCo
             next_node = heappop(heap)
             words = get_words(next_node.data)
             log_msg = 'Yielding words from search_combos'
-            logger.debug(log_msg, extra={'words': str(words), 'priority': next_node.score})
+            logger.debug(log_msg, extra={'words': str(
+                words), 'priority': next_node.score})
             yield WordCombo(''.join(w.word for w in words), words)
             last_index = next_node.data[-1]
             if len(next_node.data) < max_repeat and next_node.data[-1] + 1 < len(source):
@@ -101,7 +102,8 @@ def filter_chain(filter_pattern: set[re.Pattern], chain: Iterable[T], conversion
             })
             yield item
         else:
-            logger.debug('Word discarded via filters', extra={'word': str(data), 'filters': filter_pattern})
+            logger.debug('Word discarded via filters', extra={
+                         'word': str(data), 'filters': filter_pattern})
 
 
 def generate_tld_chain(config: RunConfig):

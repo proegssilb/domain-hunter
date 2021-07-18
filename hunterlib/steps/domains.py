@@ -50,7 +50,8 @@ def domain_combos(word_chain: Iterable[WordCombo], tld_chain: Iterable[WordCombo
     queue: List[QueueNode] = []
     next_word = next(words)
     if next_word is not None:
-        logger.debug('Doing initial domain word append', extra={'words': next_word.words()})
+        logger.debug('Doing initial domain word append',
+                     extra={'words': next_word.words()})
         word_buffer.append(next_word)
     else:
         raise ValueError('Given tld_chain had no objects. Check config.')
@@ -74,5 +75,6 @@ def domain_combos(word_chain: Iterable[WordCombo], tld_chain: Iterable[WordCombo
                 word_buffer.append(next_word)
         # Add the next word if we can
         if current_node.word_index + 1 < len(word_buffer):
-            child_1 = mk_domain(word_buffer, tlds, current_node.word_index + 1, current_node.tld_index)
+            child_1 = mk_domain(
+                word_buffer, tlds, current_node.word_index + 1, current_node.tld_index)
             heappush(queue, child_1)

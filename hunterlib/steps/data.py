@@ -5,7 +5,8 @@ from pydantic import BaseModel, constr, confloat
 
 
 class ScoredWord(BaseModel):
-    word: constr(strip_whitespace=True, to_lower=True, min_length=1, regex=r'\w*')
+    word: constr(strip_whitespace=True, to_lower=True,
+                 min_length=1, regex=r'\w*')
     score: confloat(ge=-10, le=10)
 
 
