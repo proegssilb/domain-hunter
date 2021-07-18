@@ -1,8 +1,0 @@
-nodejs 14.16.1
-doctl 1.61.0
-kubectl 1.21.1
-gcloud 344.0.0
-awscli 2.2.14
-helm 3.6.1
-operator-sdk 1.9.0
-firebase 9.14.0
