@@ -1,7 +1,11 @@
-from dataclasses import dataclass, field
-from typing import Any, Dict
+from dataclasses import dataclass
+from dataclasses import field
+from typing import Any
+from typing import Dict
 
-from pydantic import BaseModel, confloat, constr
+from pydantic import BaseModel
+from pydantic import confloat
+from pydantic import constr
 
 
 class ScoredWord(BaseModel):

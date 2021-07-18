@@ -2,18 +2,23 @@ import re
 from itertools import islice
 
 import env.env_config
-from hypothesis import assume, given
+from hypothesis import assume
+from hypothesis import given
 from hypothesis import strategies as st
 from hypothesis.strategies import composite
 
-import hunterlib.steps
 import hunterlib.steps.chains
 import hunterlib.steps.config
 import hunterlib.steps.domains
-from hunterlib.conf import NamecheapConfig, NameGuppyConfig, RunConfig
-from hunterlib.models import Bias, FileSource
-from hunterlib.steps.config import get_flattened_lists_and_files, mk_bias
-from hunterlib.steps.data import ScoredWord, WordCombo
+from hunterlib.conf import NamecheapConfig
+from hunterlib.conf import NameGuppyConfig
+from hunterlib.conf import RunConfig
+from hunterlib.models import Bias
+from hunterlib.models import FileSource
+from hunterlib.steps.config import get_flattened_lists_and_files
+from hunterlib.steps.config import mk_bias
+from hunterlib.steps.data import ScoredWord
+from hunterlib.steps.data import WordCombo
 from hunterlib.wordlist import flatten
 
 letters = "abcdefghijklmnopqrstuvwxyz"

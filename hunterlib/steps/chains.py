@@ -1,12 +1,16 @@
 import logging
 import re
 from dataclasses import dataclass
-from heapq import heappop, heappush
-from typing import Callable, Iterable, TypeVar
+from heapq import heappop
+from heapq import heappush
+from typing import Callable
+from typing import Iterable
+from typing import TypeVar
 
 from hunterlib.conf import RunConfig
 from hunterlib.models import Bias
-from hunterlib.steps.data import ScoredWord, WordCombo
+from hunterlib.steps.data import ScoredWord
+from hunterlib.steps.data import WordCombo
 
 logger = logging.getLogger("domain-hunter.chains")
 

@@ -1,9 +1,12 @@
 import logging
 import re
 
-from pydantic import BaseModel, conset, constr
+from pydantic import BaseModel
+from pydantic import conset
+from pydantic import constr
 
-from hunterlib.models import Bias, ScoreWeight
+from hunterlib.models import Bias
+from hunterlib.models import ScoreWeight
 
 
 class NameGuppyConfig(BaseModel):
