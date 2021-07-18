@@ -27,24 +27,24 @@ letters = "abcdefghijklmnopqrstuvwxyz"
 class DummyConfigModule:
     flatten_list_strings_lists = (("a", "b", "c", "d"), ("q", "w", "e", "r"))
     flatten_list_bias_lists = (
-        ('{"pattern": "asdf", "adjust": 1}', '{"pattern": "qwer", "adjust": -1}'),
-        ('{"pattern": "zxcv", "adjust": 2}', '{"pattern": "brted", "adjust": -1}'),
+        ('{"pattern": "asdf", "adjust": 1}',
+         '{"pattern": "qwer", "adjust": -1}'),
+        ('{"pattern": "zxcv", "adjust": 2}',
+         '{"pattern": "brted", "adjust": -1}'),
     )
 
 
 class TestFlattenedLists:
     def test_can_flatten_strings_in_lists(self):
         res = set(
-            get_flattened_lists_and_files(DummyConfigModule, "flatten_list_strings")
-        )
+            get_flattened_lists_and_files(DummyConfigModule,
+                                          "flatten_list_strings"))
         assert res == {"a", "b", "c", "d", "q", "w", "e", "r"}
 
     def test_can_flatten_biases_in_lists(self):
         res = set(
-            get_flattened_lists_and_files(
-                DummyConfigModule, "flatten_list_bias", Bias.parse_raw
-            )
-        )
+            get_flattened_lists_and_files(DummyConfigModule,
+                                          "flatten_list_bias", Bias.parse_raw))
         assert res == {
             Bias(pattern="asdf", adjust=1),
             Bias(pattern="qwer", adjust=-1),
@@ -54,7 +54,8 @@ class TestFlattenedLists:
 
 
 @composite
-def generate_config(draw, strings=st.text("abcdefghijklmnopqrstuvwxyz", min_size=1)):
+def generate_config(draw,
+                    strings=st.text("abcdefghijklmnopqrstuvwxyz", min_size=1)):
     return RunConfig(
         word_list=draw(st.sets(strings, min_size=50, max_size=100_000)),
         tld_list=draw(st.sets(strings, min_size=5, max_size=1000)),
@@ -80,8 +81,10 @@ class TestAppInProgress:
         assert len(conf.tld_filters) > 0
         assert len(conf.domain_filters) > 0
         result = set(
-            flatten([FileSource(mk_bias, fn) for fn in env.env_config.word_bias_files])
-        )
+            flatten([
+                FileSource(mk_bias, fn)
+                for fn in env.env_config.word_bias_files
+            ]))
         assert len(result) > 0
 
     def test_generate_chain(self):
@@ -103,8 +106,7 @@ class TestAppInProgress:
         word_chain = hunterlib.steps.chains.generate_word_chain(conf)
         tld_chain = hunterlib.steps.chains.generate_tld_chain(conf)
         domain_chain = hunterlib.steps.domains.generate_domains(
-            conf, word_chain, tld_chain
-        )
+            conf, word_chain, tld_chain)
         result = tuple(islice(domain_chain, 0, 5))
         assert len(result) == 5
         assert all(w.domain != "" for w in result)
@@ -114,8 +116,7 @@ class TestAppInProgress:
         word_chain = hunterlib.steps.chains.generate_word_chain(config)
         tld_chain = hunterlib.steps.chains.generate_tld_chain(config)
         domain_chain = hunterlib.steps.domains.generate_domains(
-            config, word_chain, tld_chain
-        )
+            config, word_chain, tld_chain)
         result = tuple(islice(domain_chain, 0, result_count))
         assert len(result) >= 1
         assert all(w.domain != "" for w in result)
@@ -128,7 +129,8 @@ class TestChains:
         st.integers(1, 10),
     )
     def test_does_not_explode(self, words, biases, max_repeat):
-        result_iter = hunterlib.steps.chains.generate_chain(words, biases, max_repeat)
+        result_iter = hunterlib.steps.chains.generate_chain(
+            words, biases, max_repeat)
         result = tuple(islice(result_iter, 0, 50))
         assert len(result) >= 1
 
@@ -138,7 +140,8 @@ class TestChains:
         st.integers(1, 10),
     )
     def test_output_sorted(self, words, biases, max_repeat):
-        result_iter = hunterlib.steps.chains.generate_chain(words, biases, max_repeat)
+        result_iter = hunterlib.steps.chains.generate_chain(
+            words, biases, max_repeat)
         result = list(islice(result_iter, 0, 50))
         assert sorted(result, key=lambda wc: wc.score, reverse=True) == result
 
@@ -154,8 +157,7 @@ class TestSearchCombos:
         words.sort(key=lambda sw: sw.score, reverse=True)
         words = tuple(words)
         result = list(
-            islice(hunterlib.steps.chains.search_combos(words, depth), 0, 500)
-        )
+            islice(hunterlib.steps.chains.search_combos(words, depth), 0, 500))
         assert len(result) >= 1
         assert sorted(result, key=lambda wc: wc.score, reverse=True) == result
 
@@ -163,7 +165,8 @@ class TestSearchCombos:
     def test_yields_all_words_from_input(self, words: list[ScoredWord]):
         words.sort(key=lambda sw: sw.score, reverse=True)
         words = tuple(words)
-        result = list(islice(hunterlib.steps.chains.search_combos(words, 1), 0, 500))
+        result = list(
+            islice(hunterlib.steps.chains.search_combos(words, 1), 0, 500))
         assert len(words) == len(result)
 
 
@@ -173,12 +176,12 @@ class TestDataClasses:
         st.integers(min_value=1, max_value=100),
         st.integers(min_value=1, max_value=100),
     )
-    def test_score_function_decreases_with_word_count(
-        self, word: ScoredWord, count_a: int, count_b: int
-    ):
+    def test_score_function_decreases_with_word_count(self, word: ScoredWord,
+                                                      count_a: int,
+                                                      count_b: int):
         assume(count_a < count_b)
-        tup_a = (word,) * count_a
-        tup_b = (word,) * count_b
+        tup_a = (word, ) * count_a
+        tup_b = (word, ) * count_b
         assert WordCombo.score_words(tup_a) >= WordCombo.score_words(tup_b)
 
     @given(

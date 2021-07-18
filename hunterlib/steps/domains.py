@@ -28,9 +28,8 @@ class QueueNode:
         self.score = -1 * self.domain.score
 
 
-def generate_domains(
-    config: RunConfig, word_chain: Iterable[WordCombo], tld_chain: Iterable[WordCombo]
-):
+def generate_domains(config: RunConfig, word_chain: Iterable[WordCombo],
+                     tld_chain: Iterable[WordCombo]):
     biases = config.domain_biases
     filters = config.domain_filters
 
@@ -38,9 +37,8 @@ def generate_domains(
     return filter_chain(filters, raw_chain, lambda d: d.domain)
 
 
-def domain_combos(
-    word_chain: Iterable[WordCombo], tld_chain: Iterable[WordCombo], biases: set[Bias]
-):
+def domain_combos(word_chain: Iterable[WordCombo],
+                  tld_chain: Iterable[WordCombo], biases: set[Bias]):
     def mk_domain(
         word_list: List[WordCombo],
         tld_list: tuple[WordCombo],
@@ -64,9 +62,8 @@ def domain_combos(
     queue: List[QueueNode] = []
     next_word = next(words)
     if next_word is not None:
-        logger.debug(
-            "Doing initial domain word append", extra={"words": next_word.words()}
-        )
+        logger.debug("Doing initial domain word append",
+                     extra={"words": next_word.words()})
         word_buffer.append(next_word)
     else:
         raise ValueError("Given tld_chain had no objects. Check config.")
@@ -90,12 +87,14 @@ def domain_combos(
             if next_word is not None:
                 logger.debug(
                     "Queueing up next word",
-                    extra={"words": next_word.words(), "buffer_len": len(word_buffer)},
+                    extra={
+                        "words": next_word.words(),
+                        "buffer_len": len(word_buffer)
+                    },
                 )
                 word_buffer.append(next_word)
         # Add the next word if we can
         if current_node.word_index + 1 < len(word_buffer):
-            child_1 = mk_domain(
-                word_buffer, tlds, current_node.word_index + 1, current_node.tld_index
-            )
+            child_1 = mk_domain(word_buffer, tlds, current_node.word_index + 1,
+                                current_node.tld_index)
             heappush(queue, child_1)

@@ -4,7 +4,6 @@ from collections.abc import Iterable
 from nltk.corpus import wordnet as wn
 from nltk.corpus.reader import Synset
 from pydantic import BaseModel
-
 """Utilities for generating and interacting with word lists."""
 
 logger = logging.getLogger("domain-hunter.wordlist")
@@ -52,8 +51,7 @@ def flatten(items: Iterable, f=lambda i: True) -> Iterable:
     """
     for el in items:
         if isinstance(el, Iterable) and not isinstance(
-            el, (str, bytes, BaseModel, dict)
-        ):
+                el, (str, bytes, BaseModel, dict)):
             yield from flatten(el)
         elif f(el):
             yield el

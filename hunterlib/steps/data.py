@@ -9,7 +9,10 @@ from pydantic import constr
 
 
 class ScoredWord(BaseModel):
-    word: constr(strip_whitespace=True, to_lower=True, min_length=1, regex=r"\w*")
+    word: constr(strip_whitespace=True,
+                 to_lower=True,
+                 min_length=1,
+                 regex=r"\w*")
     score: confloat(ge=-10, le=10)
 
 
@@ -28,7 +31,7 @@ class WordCombo:
     def score_words(words: tuple[ScoredWord]):
         word_scores = tuple(w.score + 20 for w in words)
         num_words = len(words) + 1
-        return sum(word_scores) / (10 ** num_words)
+        return sum(word_scores) / (10**num_words)
 
     def words(self):
         return tuple(sw.word for sw in self.source)
@@ -43,7 +46,7 @@ class Domain:
     plugin_data: Dict[str, Dict[str, Any]] = field(default_factory=dict)
 
     def __post_init__(self):
-        self.score = WordCombo.score_words(self.words + (self.tld,)) * 100
+        self.score = WordCombo.score_words(self.words + (self.tld, )) * 100
 
     def as_words(self):
         return tuple(sw.word for sw in self.words)

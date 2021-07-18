@@ -45,9 +45,8 @@ def process_word(biases, word: str) -> ScoredWord:
 T = TypeVar("T")
 
 
-def generate_chain(
-    source_list: set[str], biases: set[Bias], max_repeat: int
-) -> Iterable[WordCombo]:
+def generate_chain(source_list: set[str], biases: set[Bias],
+                   max_repeat: int) -> Iterable[WordCombo]:
     biased: list[ScoredWord] = [process_word(biases, w) for w in source_list]
     biased.sort(key=lambda t: t.score, reverse=True)
     biased: tuple[ScoredWord] = tuple(biased)
@@ -65,7 +64,8 @@ class QueueNode:
         self.score = -1 * score
 
 
-def search_combos(source: tuple[ScoredWord], max_repeat: int) -> Iterable[WordCombo]:
+def search_combos(source: tuple[ScoredWord],
+                  max_repeat: int) -> Iterable[WordCombo]:
     def get_words(indexes: tuple[int]) -> tuple[ScoredWord]:
         rv: list[ScoredWord] = list()
         for i in indexes:
@@ -76,49 +76,55 @@ def search_combos(source: tuple[ScoredWord], max_repeat: int) -> Iterable[WordCo
         return ()
     if len(source) == 1:
         sw = source[0]
-        yield WordCombo(sw.word, (sw,))
+        yield WordCombo(sw.word, (sw, ))
     else:
         heap = []
-        starter_node = QueueNode((0,), source[0].score)
+        starter_node = QueueNode((0, ), source[0].score)
         heappush(heap, starter_node)
 
         while len(heap) > 0:
             next_node = heappop(heap)
             words = get_words(next_node.data)
             log_msg = "Yielding words from search_combos"
-            logger.debug(
-                log_msg, extra={"words": str(words), "priority": next_node.score}
-            )
+            logger.debug(log_msg,
+                         extra={
+                             "words": str(words),
+                             "priority": next_node.score
+                         })
             yield WordCombo("".join(w.word for w in words), words)
             last_index = next_node.data[-1]
-            if len(next_node.data) < max_repeat and next_node.data[-1] + 1 < len(
-                source
-            ):
-                future_add = next_node.data + (last_index + 1,)
+            if len(next_node.data
+                   ) < max_repeat and next_node.data[-1] + 1 < len(source):
+                future_add = next_node.data + (last_index + 1, )
                 score = WordCombo.score_words(get_words(future_add))
                 heappush(heap, QueueNode(future_add, score))
             if last_index + 1 < len(source):
-                future_iterate = next_node.data[:-1] + (last_index + 1,)
+                future_iterate = next_node.data[:-1] + (last_index + 1, )
                 score = WordCombo.score_words(get_words(future_iterate))
                 heappush(heap, QueueNode(future_iterate, score))
 
 
-def filter_chain(
-    filter_pattern: set[re.Pattern], chain: Iterable[T], conversion: Callable[[T], str]
-) -> Iterable[T]:
+def filter_chain(filter_pattern: set[re.Pattern], chain: Iterable[T],
+                 conversion: Callable[[T], str]) -> Iterable[T]:
     # This is a filter and a map with extra steps. The imperative version is easier to debug.
     for item in chain:
         data = conversion(item)
         if all(p.match(data) for p in filter_pattern):
             logger.debug(
                 "Word matched all filters",
-                extra={"word": data, "filters": filter_pattern},
+                extra={
+                    "word": data,
+                    "filters": filter_pattern
+                },
             )
             yield item
         else:
             logger.debug(
                 "Word discarded via filters",
-                extra={"word": str(data), "filters": filter_pattern},
+                extra={
+                    "word": str(data),
+                    "filters": filter_pattern
+                },
             )
 
 

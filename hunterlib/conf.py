@@ -20,8 +20,10 @@ class NamecheapConfig(BaseModel):
 
 
 class RunConfig(BaseModel):
-    word_list: conset(constr(min_length=1, to_lower=True), min_items=1) = set("a")
-    tld_list: conset(constr(min_length=1, to_lower=True), min_items=1) = set("com")
+    word_list: conset(constr(min_length=1, to_lower=True),
+                      min_items=1) = set("a")
+    tld_list: conset(constr(min_length=1, to_lower=True),
+                     min_items=1) = set("com")
 
     word_filters: set[re.Pattern] = {re.compile(r"\w{1,32}")}
     tld_filters: set[re.Pattern] = {re.compile(r"\w{1,5}")}
@@ -50,6 +52,6 @@ class WordFilter(logging.Filter):
             self.words.update(words)
 
     def filter(self, record: logging.LogRecord) -> bool:
-        return getattr(record, "word", None) in self.words or self.words.intersection(
-            getattr(record, "words", ())
-        )
+        return getattr(record, "word",
+                       None) in self.words or self.words.intersection(
+                           getattr(record, "words", ()))
