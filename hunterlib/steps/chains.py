@@ -1,3 +1,4 @@
+import logging
 import re
 from dataclasses import dataclass
 from heapq import heappush, heappop
@@ -6,6 +7,8 @@ from typing import Iterable, TypeVar, Callable
 from hunterlib.conf import RunConfig
 from hunterlib.models import Bias
 from hunterlib.steps.data import ScoredWord, WordCombo
+
+logger = logging.getLogger('domain-hunter.chains')
 
 
 def generate_word_chain(config: RunConfig) -> Iterable[WordCombo]:
@@ -20,7 +23,15 @@ def generate_word_chain(config: RunConfig) -> Iterable[WordCombo]:
 
 
 def process_word(biases, word: str) -> ScoredWord:
-    score = 3 + sum(b.adjust for b in biases if b.pattern in word)
+    matching_biases = [b for b in biases if b.pattern in word]
+    score = 3 + sum(b.adjust for b in matching_biases)
+    score = score - len(word) / 100
+    log_msg = 'Generated score for word.'
+    logger.debug(log_msg, extra={
+        'word': word,
+        'score': score,
+        'biases': matching_biases,
+    })
     return ScoredWord(word=word, score=score)
 
 
@@ -65,6 +76,8 @@ def search_combos(source: tuple[ScoredWord], max_repeat: int) -> Iterable[WordCo
         while len(heap) > 0:
             next_node = heappop(heap)
             words = get_words(next_node.data)
+            log_msg = 'Yielding words from search_combos'
+            logger.debug(log_msg, extra={'words': str(words), 'priority': next_node.score})
             yield WordCombo(''.join(w.word for w in words), words)
             last_index = next_node.data[-1]
             if len(next_node.data) < max_repeat and next_node.data[-1] + 1 < len(source):
@@ -82,8 +95,20 @@ def filter_chain(filter_pattern: set[re.Pattern], chain: Iterable[T], conversion
     for item in chain:
         data = conversion(item)
         if all(p.match(data) for p in filter_pattern):
+            logger.debug('Word matched all filters', extra={
+                'word': data,
+                'filters': filter_pattern
+            })
             yield item
+        else:
+            logger.debug('Word discarded via filters', extra={'word': str(data), 'filters': filter_pattern})
 
 
 def generate_tld_chain(config: RunConfig):
-    return generate_chain(config.tld_list, config.tld_biases, 1)
+    biases = config.tld_biases
+    word_list = config.tld_list
+    filters = config.tld_filters
+
+    filtered_list = set(filter_chain(filters, word_list, lambda x: x))
+    raw_chain = generate_chain(filtered_list, biases, 1)
+    return filter_chain(filters, raw_chain, lambda wc: wc.concatenated)

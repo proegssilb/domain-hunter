@@ -12,8 +12,8 @@ def main():
     words_chain = s.generate_word_chain(conf)
     tld_chain = s.generate_tld_chain(conf)
     domain_chain = s.generate_domains(conf, words_chain, tld_chain)
-    for d in islice(domain_chain, 0, 50):
-        print("{0:32s} {1: 11.9g}".format(d.concatenated, d.score))
+    for d in islice(domain_chain, 0, 250):
+        print("{0:32s} {1: 11.9g}".format(d.domain, d.score))
 
 
 if __name__ == '__main__':
