@@ -1,3 +1,4 @@
+import logging
 import re
 
 from pydantic import BaseModel, conset, constr
@@ -34,3 +35,16 @@ class RunConfig(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+
+class WordFilter(logging.Filter):
+    def __init__(self, word=None, words=None):
+        super().__init__()
+        self.words = set()
+        if word:
+            self.words.add(word)
+        if words:
+            self.words.update(words)
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        return getattr(record, 'word', None) in self.words or self.words.intersection(getattr(record, 'words', ()))

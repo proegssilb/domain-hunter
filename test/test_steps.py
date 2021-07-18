@@ -70,7 +70,6 @@ class TestAppInProgress:
         assert len(conf.tld_list) > 0
         assert len(conf.tld_biases) > 0
         assert len(conf.tld_filters) > 0
-        assert len(conf.domain_biases) > 0
         assert len(conf.domain_filters) > 0
         result = set(flatten([FileSource(mk_bias, fn) for fn in env.env_config.word_bias_files]))
         assert len(result) > 0
@@ -96,7 +95,7 @@ class TestAppInProgress:
         domain_chain = hunterlib.steps.domains.generate_domains(conf, word_chain, tld_chain)
         result = tuple(islice(domain_chain, 0, 5))
         assert len(result) == 5
-        assert all(w.concatenated != '' for w in result)
+        assert all(w.domain != '' for w in result)
 
     @given(generate_config(), st.integers(5, 1000))
     def test_with_auto_config(self, config, result_count):
@@ -105,7 +104,7 @@ class TestAppInProgress:
         domain_chain = hunterlib.steps.domains.generate_domains(config, word_chain, tld_chain)
         result = tuple(islice(domain_chain, 0, result_count))
         assert len(result) >= 1
-        assert all(w.concatenated != '' for w in result)
+        assert all(w.domain != '' for w in result)
 
 
 class TestChains:
@@ -132,15 +131,19 @@ class TestSearchCombos:
     def test_yields_output(self, words: list[ScoredWord], depth: int):
         words.sort(key=lambda sw: sw.score, reverse=True)
         words = tuple(words)
-        result = tuple(islice(hunterlib.steps.chains.search_combos(words, depth), 0, 500))
+        result = list(islice(hunterlib.steps.chains.search_combos(words, depth), 0, 500))
         assert len(result) >= 1
-        for (a, b) in zip(result, result[1:]):
-            assert a.score >= b.score
+        assert sorted(result, key=lambda wc: wc.score, reverse=True) == result
+
+    @given(st.lists(st.from_type(ScoredWord), min_size=1, max_size=400))
+    def test_yields_all_words_from_input(self, words: list[ScoredWord]):
+        words.sort(key=lambda sw: sw.score, reverse=True)
+        words = tuple(words)
+        result = list(islice(hunterlib.steps.chains.search_combos(words, 1), 0, 500))
+        assert len(words) == len(result)
 
 
 class TestDataClasses:
-    letters = 'abcdefghijklmnopqrstuvwxyz'
-
     @given(st.from_type(ScoredWord), st.integers(min_value=1, max_value=100), st.integers(min_value=1, max_value=100))
     def test_score_function_decreases_with_word_count(self, word: ScoredWord, count_a: int, count_b: int):
         assume(count_a < count_b)

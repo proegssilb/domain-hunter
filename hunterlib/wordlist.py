@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Iterable
 
 from nltk.corpus import wordnet as wn
@@ -5,6 +6,8 @@ from nltk.corpus.reader import Synset
 from pydantic import BaseModel
 
 """Utilities for generating and interacting with word lists."""
+
+logger = logging.getLogger('domain-hunter.wordlist')
 
 
 def synset_to_str(s: Synset) -> str:
@@ -15,6 +18,16 @@ def words(syn: str) -> Iterable[str]:
     """Convert a wordnet synset reference to a list of possible synsets"""
     base: Synset = wn.synset(syn)
     tree = base.tree(lambda s: s.hyponyms())
+    rv = set()
+    log_msg = 'Generated word from synset.'
+    for synset in flatten(tree):
+        word = synset_to_str(synset)
+        logger.debug(log_msg, extra={
+            'word': word,
+            'alternates': synset.lemma_names(),
+            'tree_base': str(base),
+        })
+        rv.add(word)
     return {synset_to_str(s) for s in flatten(tree)}
 
 
